@@ -190,12 +190,12 @@ You should see in your terminal a message indicating that the server is listenin
 > Server Listening for port: 8000
 
 2. To make sure your application is working fine and it creates the Genesis Block you can use POSTMAN to request the Genesis block:
-    ![Request: http://localhost:8000/block/0 ](screenshots/1.jpeg)
+    ![Request: http://localhost:8000/block/0 ](screenshots/1.jpg)
 3. Make your first request of ownership sending your wallet address:
-    ![Request: http://localhost:8000/requestValidation ](screenshots/2.jpeg)
+    ![Request: http://localhost:8000/requestValidation ](screenshots/2.jpg)
 4. Sign the message with your Wallet:
-    ![Use the Wallet to sign a message](screenshots/3.jpeg)
+    ![Use the Wallet to sign a message](screenshots/3.jpg)
 5. Submit your Star
-     ![Request: http://localhost:8000/submitstar](screenshots/4.jpeg)
+     ![Request: http://localhost:8000/submitstar](screenshots/4.jpg)
 6. Retrieve Stars owned by me
-    ![Request: http://localhost:8000/blocks/<WALLET_ADDRESS>](screenshots/5.jpeg)
+    ![Request: http://localhost:8000/blocks/<WALLET_ADDRESS>](screenshots/5.jpg)
