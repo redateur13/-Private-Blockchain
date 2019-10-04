@@ -126,9 +126,9 @@ class Blockchain {
 
             if (time > (currentTime - 300000)) {
                 if(bitcoinMessage.verify(message, address, signature)) {
-                    let block = new BlockClass.Block({"owner": address, "star": star});
-                    await self._addBlock(block);
-                    resolve(block);
+                    let newBlock = new BlockClass.Block({owner:address, star:star});
+                    let addedBlock = await self._addBlock(newBlock);
+                    resolve(addedBlock);
                 } else {
                     reject(Error("signature is not valid"))
                 }
@@ -185,12 +185,13 @@ class Blockchain {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
-            self.chain.forEach(function(block) {
-                block.getBData().then(data => {
-                    if (data.owner) {
+            self.chain.forEach((block) => {
+                let data = block.getBData();
+                if(data){
+                    if(data.owner === address){
                         stars.push(data);
                     }
-                });
+                }
             });
             resolve(stars); 
         });
@@ -206,34 +207,34 @@ class Blockchain {
         let self = this;
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
-            if (self.height > 0) {
-                for (var i = 1; i <= self.height; i++) {
-                    let block = self.chain[i];
-                    let validation = await block.validate();
-                    if (!validation){
-                        console.log("ERROR VALIDATING DATA");
-                    } else if (block.previousBlockHash != self.chain[i-1].hash) {
-                        console.log("ERROR WITH PREVIOUS BLOCK HASH");
+
+            let promises = [];
+            let chainIndex = 0;
+            self.chain.forEach(block => {
+
+                promises.push(block.validate());
+                if(block.height > 0){
+                    let previousBlockHash = block.previousBlockHash;
+                    let blockHash = self.chain[chainIndex-1].hash;
+                    if(blockHash != previousBlockHash){
+                        errorLog.push(`Error : Invalid Previous Hash`);
                     }
                 }
-                if (errorLog) {
-                    resolve(errorLog);
-                } else {
-                    resolve("Chain is valid.");
-                }
-            } else {
-                reject(Error("Cannot validate chain.")).catch(error => {
-                    console.log('caught', error.message);
+                chainIndex++;
+            });
+            Promise.all(promises).then((results) => {
+
+                chainIndex = 0;
+                results.forEach(valid => {
+                    if(!valid){
+                        errorLog.push(`Error :block heigh invalid`);
+                    }
+                    chainIndex++;
                 });
-            }
-        }).then(successfulValidation => {
-            console.log(successfulValidation);
-        }).catch(unsuccessfulValidation => {
-            console.log(unsuccessfulValidation);
-            
+                resolve(errorLog);
+            }).catch((err) => {console.log(err); reject(err)});
         });
     }
-
 }
 
 module.exports.Blockchain = Blockchain;   
