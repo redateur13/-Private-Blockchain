@@ -1,5 +1,20 @@
 # Private Blockchain Application
 
+
+![Request: http://localhost:8000/block/0 ](screenshots/1.jpg)
+
+![Request: http://localhost:8000/requestValidation ](screenshots/2.jpg)
+
+![Use the Wallet to sign a message](screenshots/3.jpg)
+
+![Request: http://localhost:8000/submitstar](screenshots/4.jpg)
+
+![Request: http://localhost:8000/blocks/<WALLET_ADDRESS>](screenshots/5.jpg)
+
+
+
+
+
 You are starting your journey as a Blockchain Developer, this project allows you to demonstrate
 that you are familiarized with the fundamentals concepts of a Blockchain platform.
 Concepts like:

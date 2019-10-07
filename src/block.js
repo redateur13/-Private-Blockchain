@@ -78,18 +78,12 @@ class Block {
         let dataObject = JSON.parse(deCodedData);
 
         // Resolve with the data if the object isn't the Genesis block
-        let self = this;
         return new Promise((resolve, reject) => {
-            if(self.height > 0){
-                resolve(JSON.parse(hex2ascii(self.body)));
-            }else{
-                reject(false)
-            }
-
+            if (!this.previousBlockHash) resolve(null);
+            let decodedData = JSON.parse( hex2ascii(this.body) );
+            resolve(decodedData);
         });
-
     }
-
 }
 
 // Exposing the Block class as a module

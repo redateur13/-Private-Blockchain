@@ -64,24 +64,19 @@ class Blockchain {
     _addBlock(block) {
         let self = this;
         return new Promise(async (resolve, reject) => {
-
             block.height = self.height + 1;
             block.time = new Date().getTime().toString().slice(0,-3);
-
             if (self.chain.length > 0) {
                 block.previousBlockHash = self.chain[self.height].hash;
             }
             block.hash = SHA256(JSON.stringify(block)).toString();
-
             self.chain.push(block);
             self.height += 1;
-
             if (self.chain[self.height] == block) {
                 resolve(block);
             } else {
                 reject(Error("Block not valid"));
             }
-           
         });
     }
 
@@ -96,8 +91,7 @@ class Blockchain {
     requestMessageOwnershipVerification(address) {
         return new Promise((resolve) => {
             let message = `${address}:${new Date().getTime().toString().slice(0,-3)}:starRegistry`;
-            resolve(message);
-            
+            resolve(message);    
         });
     }
 
@@ -123,7 +117,6 @@ class Blockchain {
         return new Promise(async (resolve, reject) => {
             let time = parseInt(message.split(':')[1]);
             let currentTime = parseInt(new Date().getTime().toString().slice(0,-3));
-
             if (time > (currentTime - 300000)) {
                 if(bitcoinMessage.verify(message, address, signature)) {
                     let newBlock = new BlockClass.Block({owner:address, star:star});
@@ -135,7 +128,6 @@ class Blockchain {
             } else {
                 reject(Error("You should submit the star before 5 minutes"));
             }
-            
         });
     }
 
@@ -153,8 +145,7 @@ class Blockchain {
                resolve(block);
             } else {
                resolve(null);
-            }
-           
+            } 
         });
     }
 
@@ -185,15 +176,11 @@ class Blockchain {
         let self = this;
         let stars = [];
         return new Promise((resolve, reject) => {
-            self.chain.forEach((block) => {
-                let data = block.getBData();
-                if(data){
-                    if(data.owner === address){
-                        stars.push(data);
-                    }
-                }
+            self.chain.forEach(async (block) => {
+                let blockData = await block.getBData();
+                if (blockData && blockData.owner === address) stars.push(blockData);
             });
-            resolve(stars); 
+            resolve(stars);
         });
     }
 
@@ -208,31 +195,26 @@ class Blockchain {
         let errorLog = [];
         return new Promise(async (resolve, reject) => {
 
-            let promises = [];
-            let chainIndex = 0;
-            self.chain.forEach(block => {
-
-                promises.push(block.validate());
-                if(block.height > 0){
-                    let previousBlockHash = block.previousBlockHash;
-                    let blockHash = self.chain[chainIndex-1].hash;
-                    if(blockHash != previousBlockHash){
-                        errorLog.push(`Error : Invalid Previous Hash`);
-                    }
+            for (let i = 0; i < this.chain.length; i++) {
+                let currentBlock = this.chain[i];
+                if ( !(await currentBlock.validate()) ) {
+                    errorLog.push({
+                        error: 'Error : Invalid validation',
+                        block: currentBlock
+                    });
                 }
-                chainIndex++;
-            });
-            Promise.all(promises).then((results) => {
+                if (i === 0) continue;
+                let previousBlock = this.chain[i - 1];
+                if (currentBlock.previousBlockHash !== previousBlock.hash) {
+                    errorLog.push({
+                        error: 'Error :block hash invalid ',
+                        block: currentBlock
+                    });
+                }
+            }
 
-                chainIndex = 0;
-                results.forEach(valid => {
-                    if(!valid){
-                        errorLog.push(`Error :block heigh invalid`);
-                    }
-                    chainIndex++;
-                });
-                resolve(errorLog);
-            }).catch((err) => {console.log(err); reject(err)});
+            resolve(errorLog);
+            
         });
     }
 }
